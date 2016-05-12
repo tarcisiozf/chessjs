@@ -1,9 +1,9 @@
 
 	/*
 		TODO:
-		all pieces movements
-		all pieces attacks
 		path collision
+		multiplayer
+		drag 'n drop
 	*/
 
 	class Chess {
@@ -12,17 +12,17 @@
 
 			// board initial position
 			this.board = [
-				['ro_d','kn_d','bi_d','qu_d','ki_d','bi_d','kn_d','ro_d'],
-				['pa_d','pa_d','pa_d','pa_d','pa_d','pa_d','pa_d','pa_d'],
+				['ro_1','kn_1','bi_1','qu_1','ki_1','bi_1','kn_1','ro_1'],
+				['pa_1','pa_1','pa_1','pa_1','pa_1','pa_1','pa_1','pa_1'],
 				['empt','empt','empt','empt','empt','empt','empt','empt'],
 				['empt','empt','empt','empt','empt','empt','empt','empt'],
 				['empt','empt','empt','empt','empt','empt','empt','empt'],
 				['empt','empt','empt','empt','empt','empt','empt','empt'],
-				['pa_l','pa_l','pa_l','pa_l','pa_l','pa_l','pa_l','pa_l'],
-				['ro_l','kn_l','bi_l','qu_l','ki_l','bi_l','kn_l','ro_l'],
+				['pa_0','pa_0','pa_0','pa_0','pa_0','pa_0','pa_0','pa_0'],
+				['ro_0','kn_0','bi_0','qu_0','ki_0','bi_0','kn_0','ro_0'],
 			];
 
-			this.board[5][5] = 'pa_d';
+			// this.board[4][4] = 'qu_0';
 
 			this.piecesAttributes = new piecesAttributes;
 
@@ -32,20 +32,15 @@
 			// starts without any piece selected
 			this.selected_piece;
 
-			// BIND ALL METHODS TO THIS SCOPE
+			// BIND METHODS TO THIS SCOPE
 			this.renderBoard = this.renderBoard.bind(this);
 			this.selectSquare = this.selectSquare.bind(this);
-			this.getPieceOwner = this.getPieceOwner.bind(this);
 			this.changeTurn = this.changeTurn.bind(this);
 			this.checkMove = this.checkMove.bind(this);
 			this.unselectSquare = this.unselectSquare.bind(this);
 
 			// Draw the table
 			this.renderBoard();
-		}
-
-		getPieceOwner(player) {
-			return { 'l': 0, 'd': 1 }[player];
 		}
 
 		checkMove(x, y) {
@@ -97,7 +92,7 @@
 
 			[piece, player] = this.piecesAttributes.parse(this.board[y][x]) || [];
 
-			if ( this.player != this.getPieceOwner(player) ) 
+			if ( this.player != player ) 
 				return true;
 		}
 
@@ -135,8 +130,6 @@
 				return;
 
 			// Check if the player can choose that piece
-			player = this.getPieceOwner(player);
-
 			if ( player != this.player ) {	
 				this.showMessage("You can't choose a opponent piece!");
 				return;
@@ -153,7 +146,7 @@
 
 			var tmp = this.board[y][x];
 
-			this.board[y][x] = `${this.selected_piece.piece}_${['l','d'][this.selected_piece.player]}`;
+			this.board[y][x] = `${this.selected_piece.piece}_${this.selected_piece.player}`;
 			this.board[this.selected_piece.y][this.selected_piece.x] = tmp;
 
 			this.selected_piece = null;
@@ -164,7 +157,7 @@
 		attackPiece(x, y) {
 			this.unselectSquare(this.selected_piece.x, this.selected_piece.y);
 
-			this.board[y][x] = `${this.selected_piece.piece}_${['l','d'][this.selected_piece.player]}`;
+			this.board[y][x] = `${this.selected_piece.piece}_${this.selected_piece.player}`;
 			this.board[this.selected_piece.y][this.selected_piece.x] = 'empt';
 
 			this.selected_piece = null;
