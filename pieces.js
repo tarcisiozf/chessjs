@@ -22,6 +22,8 @@
 
 					if ( piece.y + step == dest_y && piece.x == dest_x ) 
 						return true;
+					if ( piece.y + (step*2) == dest_y && piece.x == dest_x ) 
+						return true;
 				},
 
 				canAttack: function(piece, dest_x, dest_y) {

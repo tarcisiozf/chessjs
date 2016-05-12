@@ -3,7 +3,7 @@
 		TODO:
 		path collision
 		multiplayer
-		drag 'n drop
+		checkmate
 	*/
 
 	class Chess {
@@ -120,7 +120,7 @@
 			[piece, player] = this.piecesAttributes.parse(square) || [];
 
 			// a piece was choose before, time to make the move
-			if ( this.selected_piece ) {	
+			if ( this.selected_piece ) {
 				this.checkMove(x, y);
 				return;
 			}
@@ -186,11 +186,12 @@
 					var piece = this.board[y][x];
 
 					html += `
-						<td style='background-color: ${bg_colors[color]};' >
+						<td ondrop='onDrop(event, ${x}, ${y})' onDragOver='allowDrop(event)' style='background-color: ${bg_colors[color]};' >
 							<img 
 								id='img_${x}_${y}'
-								onClick='game.selectSquare(${x}, ${y})'
 								src='images/pieces/${piece}.png'
+								onDragStart='onDragStart(event, ${x}, ${y})'
+								draggable='true'
 							/>
 						</td>
 					`;
@@ -212,3 +213,14 @@
 	}
 
 	var game = new Chess;
+
+	var allowDrop = (ev) => ev.preventDefault();
+
+	var onDrop = (ev, x, y) => {
+		game.selectSquare(x, y);
+		ev.preventDefault();
+	}
+
+	var onDragStart = (ev, x, y) => {
+		game.selectSquare(x, y);
+	}
