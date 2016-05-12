@@ -1,0 +1,22 @@
+.board table {
+	border-collapse: collapse;
+	border: 3px solid black;
+}
+
+.board table tr td {
+	cursor: pointer;
+	padding: 0px;
+}
+
+.board table tr td img {
+	padding: 3px;
+	transition: 0.2s;
+}
+
+.board table tr td img:hover {
+	background-color: #D3C139;
+}
+
+.message {
+	color: red;
+}
