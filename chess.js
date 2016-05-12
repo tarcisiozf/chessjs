@@ -4,6 +4,7 @@
 		path collision
 		multiplayer
 		checkmate
+		remover html do código
 	*/
 
 	class Chess {
@@ -224,3 +225,17 @@
 	var onDragStart = (ev, x, y) => {
 		game.selectSquare(x, y);
 	}
+
+	
+/*	var socket = io('http://localhost:3000');
+
+	socket.on('news', function(data){
+		console.log(data);
+		socket.emit('receive', { my: 'data' });
+	});
+
+	socket.emit('join_room', { 'room_id': });
+	
+	socket.on('msg', function(data){
+		console.log(data);
+	});*/
