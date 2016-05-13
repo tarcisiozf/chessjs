@@ -4,7 +4,6 @@
 		path collision
 		multiplayer
 		checkmate
-		remover html do código
 	*/
 
 	class Chess {
@@ -176,39 +175,48 @@
 			const bg_colors = ['#FFF','#494949'];
 			var color = 1;
 
-			var html = '<table>';
+			var table = document.createElement('table');
 
 			for ( var y in this.board ) {
 
-				html += '<tr>';
+				var tr = document.createElement('tr');
 
 				for( var x in this.board[y] ) {
 
 					var piece = this.board[y][x];
 
-					html += `
-						<td ondrop='onDrop(event, ${x}, ${y})' onDragOver='allowDrop(event)' style='background-color: ${bg_colors[color]};' >
-							<img 
-								id='img_${x}_${y}'
-								src='images/pieces/${piece}.png'
-								onDragStart='onDragStart(event, ${x}, ${y})'
-								draggable='true'
-							/>
-						</td>
-					`;
+					var td = document.createElement('td');
+						td.setAttribute('onDrop', `onDrop(event, ${x}, ${y})`);
+						td.setAttribute('onDragOver', 'allowDrop(event)');
+						td.style = `background-color: ${bg_colors[color]};`;
+
+					var img = document.createElement('img');
+						img.id = `img_${x}_${y}`;
+						img.src = `images/pieces/${piece}.png`;
+						img.setAttribute('onDragStart', `onDragStart(event, ${x}, ${y})`);
+						img.draggable = 'true';
+
+					td.appendChild(img);
+
+					tr.appendChild(td);
 
 					// toggle square color
 					color ^= 1;
 				}
 
-				html += '</tr>';
+				table.appendChild(tr);
 
 				// toggle square color
 				color ^= 1;
 			}
 
-			document.querySelector('#board').innerHTML = html;
+			var board = document.querySelector('#board');
 
+			if (board.childNodes.length > 0) {
+				board.removeChild(board.firstChild);
+			}
+
+			board.appendChild(table);
 		}
 
 	}
