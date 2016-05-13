@@ -119,12 +119,6 @@
 
 			[piece, player] = this.piecesAttributes.parse(square) || [];
 
-			// a piece was choose before, time to make the move
-			if ( this.selected_piece ) {
-				this.checkMove(x, y);
-				return;
-			}
-
 			// You can't choose a empty square
 			if ( square === 'empt' ) 
 				return;
@@ -212,6 +206,7 @@
 
 			var board = document.querySelector('#board');
 
+			// clear the board first
 			if (board.childNodes.length > 0) {
 				board.removeChild(board.firstChild);
 			}
@@ -226,8 +221,8 @@
 	var allowDrop = (ev) => ev.preventDefault();
 
 	var onDrop = (ev, x, y) => {
-		game.selectSquare(x, y);
 		ev.preventDefault();
+		game.checkMove(x, y);
 	}
 
 	var onDragStart = (ev, x, y) => {
