@@ -8,7 +8,7 @@
 
 	class Chess {
 
-		constructor() {
+		constructor(player, socketIO) {
 
 			// board initial position
 			this.board = [
@@ -22,12 +22,10 @@
 				['rook_0',	'knight_0',	'bishop_0',	'queen_0',	'king_0',	'bishop_0',	'knight_0',	'rook_0'],
 			];
 
-			// this.board[4][4] = 'queen_0';
-
 			this.piecesAttributes = new piecesAttributes;
 
 			// starts with player 'light'
-			this.player = 0;
+			this.player = player;
 
 			// starts without any piece selected
 			this.selected_piece;
@@ -37,9 +35,35 @@
 			this.selectSquare = this.selectSquare.bind(this);
 			this.changeTurn = this.changeTurn.bind(this);
 			this.checkMove = this.checkMove.bind(this);
+			this.setupMultiplayer = this.setupMultiplayer.bind(this);
 
 			// Draw the table
 			this.renderBoard();
+			this.setupMultiplayer(socketIO);
+		}
+
+		setupMultiplayer(socketIO) {
+
+			var self = this;
+
+			this.socket = socketIO('http://192.168.0.100:3000');
+
+			this.socket.emit('join_room', { 'room_id': 1});
+			
+			this.socket.on('movePiece', function(data){
+				self.selected_piece = data.selected_piece;
+				self.movePiece(data.x, data.y, false);
+			});
+
+			this.socket.on('attackPiece', function(data){
+				self.selected_piece = data.selected_piece;
+				self.attackPiece(data.x, data.y, false);
+			});
+
+			this.socket.on('setPlayer', function(data) {
+				self.player = data.player; 
+			});
+
 		}
 
 		checkMove(x, y) {
@@ -158,7 +182,11 @@
 			this.selected_piece = { player, piece, x, y };
 		}
 
-		movePiece(x, y) {
+		movePiece(x, y, broadcast = true) {
+
+			if ( broadcast )
+				this.socket.emit('movePiece', { selected_piece: this.selected_piece, x, y });
+
 			var tmp = this.board[y][x];
 
 			this.board[y][x] = `${this.selected_piece.piece}_${this.selected_piece.player}`;
@@ -169,7 +197,11 @@
 			this.renderBoard();
 		}
 
-		attackPiece(x, y) {
+		attackPiece(x, y, broadcast = true) {
+
+			if ( broadcast )
+				this.socket.emit('movePiece', { selected_piece: this.selected_piece, x, y });
+
 			this.board[y][x] = `${this.selected_piece.piece}_${this.selected_piece.player}`;
 			this.board[this.selected_piece.y][this.selected_piece.x] = 'empty';
 
@@ -181,6 +213,7 @@
 		changeTurn() {
 			this.player ^= 1;
 			this.showMessage(`Now it's ${['Light','Dark'][this.player]} player turn`, false);
+			this.socket.emit('setPlayer', { player: this.player });
 		}
 
 		renderBoard() {
@@ -199,14 +232,14 @@
 					var piece = this.board[y][x];
 
 					var td = document.createElement('td');
-						td.setAttribute('onDrop', `onDrop(event, ${x}, ${y})`);
-						td.setAttribute('onDragOver', 'allowDrop(event)');
+						td.setAttribute('onDrop', `game.onDrop(event, ${x}, ${y})`);
+						td.setAttribute('onDragOver', 'game.allowDrop(event)');
 						td.style = `background-color: ${bg_colors[color]};`;
 
 					var img = document.createElement('img');
 						img.id = `img_${x}_${y}`;
 						img.src = `images/pieces/${piece}.png`;
-						img.setAttribute('onDragStart', `onDragStart(event, ${x}, ${y})`);
+						img.setAttribute('onDragStart', `game.onDragStart(event, ${x}, ${y})`);
 						img.draggable = 'true';
 
 					td.appendChild(img);
@@ -233,31 +266,25 @@
 			board.appendChild(table);
 		}
 
+		allowDrop (ev) {
+			ev.preventDefault();
+		}
+
+		onDrop (ev, x, y) {
+			ev.preventDefault();
+			this.checkMove(x, y);
+		}
+
+		onDragStart (ev, x, y) {
+			this.selectSquare(x, y);
+		}
+
 	}
 
-	var game = new Chess;
+	var player;
 
-	var allowDrop = (ev) => ev.preventDefault();
-
-	var onDrop = (ev, x, y) => {
-		ev.preventDefault();
-		game.checkMove(x, y);
+	if ( player = window.prompt('Select your player:', 0) ) {
+		var game = new Chess(player, io);
+	} else {
+		alert('You must choose a player!');
 	}
-
-	var onDragStart = (ev, x, y) => {
-		game.selectSquare(x, y);
-	}
-
-	
-/*	var socket = io('http://localhost:3000');
-
-	socket.on('news', function(data){
-		console.log(data);
-		socket.emit('receive', { my: 'data' });
-	});
-
-	socket.emit('join_room', { 'room_id': });
-	
-	socket.on('msg', function(data){
-		console.log(data);
-	});*/

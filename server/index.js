@@ -10,13 +10,27 @@ function handler (req, res) {
 
 io.on('connection', function (socket) {
 
-	socket.on('receive', function (data) {
-		console.log(data);
+	var room_id;
+
+	socket.on('movePiece', function (data) {
+		socket.broadcast.to(room_id).emit('movePiece', data);
+	});
+
+	socket.on('attackPiece', function (data) {
+		socket.broadcast.to(room_id).emit('attackPiece', data);
+	});
+
+	socket.on('setPlayer', function (data) {
+		socket.broadcast.to(room_id).emit('setPlayer', data);
 	});
 
 	socket.on('join_room', function(data) {
-		socket.join(data.room);
+		room_id = data.room_id;
+		socket.join(data.room_id);
 	});
 
-	// setInterval(function() { io.in(1).emit('msg', 'teste'); }, 3000);
 });
+
+/*setInterval(function() { 
+	io.in(1).emit('msg', 'teste');
+}, 3000);*/
