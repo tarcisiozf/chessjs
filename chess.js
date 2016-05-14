@@ -12,17 +12,17 @@
 
 			// board initial position
 			this.board = [
-				['ro_1','kn_1','bi_1','qu_1','ki_1','bi_1','kn_1','ro_1'],
-				['pa_1','pa_1','pa_1','pa_1','pa_1','pa_1','pa_1','pa_1'],
-				['empt','empt','empt','empt','empt','empt','empt','empt'],
-				['empt','empt','empt','empt','empt','empt','empt','empt'],
-				['empt','empt','empt','empt','empt','empt','empt','empt'],
-				['empt','empt','empt','empt','empt','empt','empt','empt'],
-				['pa_0','pa_0','pa_0','pa_0','pa_0','pa_0','pa_0','pa_0'],
-				['ro_0','kn_0','bi_0','qu_0','ki_0','bi_0','kn_0','ro_0'],
+				['rook_1',	'knight_1',	'bishop_1',	'queen_1',	'king_1',	'bishop_1',	'knight_1',	'rook_1'],
+				['pawn_1',	'pawn_1',	'pawn_1',	'pawn_1',	'pawn_1',	'pawn_1',	'pawn_1',	'pawn_1'],
+				['empty',	'empty',	'empty',	'empty',	'empty',	'empty',	'empty',	'empty'	],
+				['empty',	'empty',	'empty',	'empty',	'empty',	'empty',	'empty',	'empty'	],
+				['empty',	'empty',	'empty',	'empty',	'empty',	'empty',	'empty',	'empty'	],
+				['empty',	'empty',	'empty',	'empty',	'empty',	'empty',	'empty',	'empty'	],
+				['pawn_0',	'pawn_0',	'pawn_0',	'pawn_0',	'pawn_0',	'pawn_0',	'pawn_0',	'pawn_0'],
+				['rook_0',	'knight_0',	'bishop_0',	'queen_0',	'king_0',	'bishop_0',	'knight_0',	'rook_0'],
 			];
 
-			// this.board[4][4] = 'qu_0';
+			// this.board[4][4] = 'queen_0';
 
 			this.piecesAttributes = new piecesAttributes;
 
@@ -37,7 +37,6 @@
 			this.selectSquare = this.selectSquare.bind(this);
 			this.changeTurn = this.changeTurn.bind(this);
 			this.checkMove = this.checkMove.bind(this);
-			this.unselectSquare = this.unselectSquare.bind(this);
 
 			// Draw the table
 			this.renderBoard();
@@ -45,11 +44,12 @@
 
 		checkMove(x, y) {
 
+			if ( ! this.selected_piece )
+				return;
+
 			// check if the player clicked at same square, if true, unselect piece
 			if ( this.selected_piece.x == x && this.selected_piece.y == y ) {
 				this.selected_piece = null;
-				this.unselectSquare(x, y);
-
 				return;
 			}
 
@@ -57,12 +57,12 @@
 			var isEnemy = this.isOpponentPiece(x, y);
 			var piece = this.piecesAttributes[this.selected_piece.piece]; // Rules of movements, attacks and etc 
 
-			if ( destHasPiece && ! isEnemy ) {
+			if ( destHasPiece && ! isEnemy ) { // destination is not emptyy
 
 				this.showMessage("That square is already occupied!");
 				return;
 
-			} else if ( destHasPiece && isEnemy ) {
+			} else if ( destHasPiece && isEnemy ) { // destination has an enemy piece
 
 				if ( piece.canAttack(this.selected_piece, x, y) ) {
 					this.attackPiece(x, y);
@@ -79,10 +79,38 @@
 					return;
 				}
 
+				// Check if the path is not blocked
+				if ( ! piece.canJump && this.pathIsBlocked(x, y) ) {
+					this.showMessage("Your path is blocked!");
+					return;
+				}
+
 				this.movePiece(x, y);
 			}
 
 			this.changeTurn();
+
+		}
+
+		pathIsBlocked(x, y) {
+
+			// moving from left to right
+			var range_x = _.range(this.selected_piece.x, x+1);
+			var range_y = _.range(this.selected_piece.y, y+1);
+
+			// moving from right to left
+			if ( ! range_x.length ) 
+				range_x = _.range(x, this.selected_piece.x+1);
+
+			if ( ! range_y.length ) 
+				range_y = _.range(y, this.selected_piece.y+1);
+
+			console.log(range_x, range_y);
+
+			x = range_x[0] || x;
+			y = range_y[0] || y;
+
+			console.log(x, y);
 
 		}
 
@@ -97,17 +125,14 @@
 		}
 
 		destinationHasPiece(x, y) {
-			if (this.board[y][x] != 'empt')
+			if (this.board[y][x] != 'empty')
 				return true;
 		}
 
-		showMessage(message) {
+		showMessage(message, fade = true) {
 			document.querySelector('.message').innerHTML = message;
-			setTimeout(() => this.showMessage(''), 2000);
-		}
-
-		unselectSquare(x, y) {
-			document.querySelector(`#img_${x}_${y}`).style.backgroundColor = 'transparent';
+			if (fade)
+				setTimeout(() => this.showMessage(''), 3000);
 		}
 
 		selectSquare(x, y) {
@@ -119,8 +144,8 @@
 
 			[piece, player] = this.piecesAttributes.parse(square) || [];
 
-			// You can't choose a empty square
-			if ( square === 'empt' ) 
+			// You can't choose a emptyy square
+			if ( square === 'empty' ) 
 				return;
 
 			// Check if the player can choose that piece
@@ -131,13 +156,9 @@
 
 			// Save the piece to make the move
 			this.selected_piece = { player, piece, x, y };
-
-			document.querySelector(`#img_${x}_${y}`).style.backgroundColor = '#D3C139';
 		}
 
 		movePiece(x, y) {
-			this.unselectSquare(this.selected_piece.x, this.selected_piece.y);
-
 			var tmp = this.board[y][x];
 
 			this.board[y][x] = `${this.selected_piece.piece}_${this.selected_piece.player}`;
@@ -149,10 +170,8 @@
 		}
 
 		attackPiece(x, y) {
-			this.unselectSquare(this.selected_piece.x, this.selected_piece.y);
-
 			this.board[y][x] = `${this.selected_piece.piece}_${this.selected_piece.player}`;
-			this.board[this.selected_piece.y][this.selected_piece.x] = 'empt';
+			this.board[this.selected_piece.y][this.selected_piece.x] = 'empty';
 
 			this.selected_piece = null;
 
@@ -161,7 +180,7 @@
 
 		changeTurn() {
 			this.player ^= 1;
-			this.showMessage(`Now it's ${['Light','Dark'][this.player]} player turn`);
+			this.showMessage(`Now it's ${['Light','Dark'][this.player]} player turn`, false);
 		}
 
 		renderBoard() {

@@ -11,8 +11,10 @@
 
 		constructor() {
 
+			var self = this;
+
 			// Pawn attributes
-			this.pa = {
+			this.pawn = {
 
 				canMove: function(piece, dest_x, dest_y) {
 
@@ -42,10 +44,12 @@
 
 				},
 
+				canJump: false,
+
 			}
 
 			// Knight attributes
-			this.kn = {
+			this.knight = {
 
 				canMove: function(piece, dest_x, dest_y) {
 
@@ -69,18 +73,20 @@
 				},
 
 				// Attack has the same rules of movement
-				canAttack: (piece, dest_x, dest_y) => { return this.kn.canMove(piece, dest_x, dest_y) },
+				canAttack: (piece, dest_x, dest_y) => { return this.knight.canMove(piece, dest_x, dest_y) },
+
+				canJump: true,
 
 			}
 
 			// King attributes
-			this.ki = {
+			this.king = {
 
 				canMove: function(piece, dest_x, dest_y) {
 
 					if ( piece.x - 1 == dest_x && piece.y - 1 == dest_y ) // top left
 						return true;
-					if ( piece.x == dest_x && piece.y - 1 == dest_y ) // top center
+					if ( piece.x == dest_x	   && piece.y - 1 == dest_y ) // top center
 						return true;
 					if ( piece.x + 1 == dest_x && piece.y - 1 == dest_y ) // top right
 						return true;
@@ -90,7 +96,7 @@
 						return true;
 					if ( piece.x - 1 == dest_x && piece.y + 1 == dest_y ) // bottom left
 						return true;
-					if ( piece.x == dest_x && piece.y + 1 == dest_y ) // bottom center
+					if ( piece.x == dest_x 	   && piece.y + 1 == dest_y ) // bottom center
 						return true;
 					if ( piece.x + 1 == dest_x && piece.y + 1 == dest_y ) // bottom right
 						return true;
@@ -98,12 +104,14 @@
 				},
 
 				// Attack has the same rules of movement
-				canAttack: (piece, dest_x, dest_y) => { return this.ki.canMove(piece, dest_x, dest_y) },
+				canAttack: (piece, dest_x, dest_y) => { return this.king.canMove(piece, dest_x, dest_y) },
+
+				canJump: false,
 
 			}
 
 			// Rook attributes
-			this.ro = {
+			this.rook = {
 
 				canMove: function(piece, dest_x, dest_y) {
 
@@ -115,12 +123,14 @@
 				},
 
 				// Attack has the same rules of movement
-				canAttack: (piece, dest_x, dest_y) => { return this.ro.canMove(piece, dest_x, dest_y) },
+				canAttack: (piece, dest_x, dest_y) => { return this.rook.canMove(piece, dest_x, dest_y) },
+
+				canJump: false,
 
 			}
 
 			// Bishop attributes
-			this.bi = {
+			this.bishop = {
 
 				canMove: function(piece, dest_x, dest_y) {
 
@@ -139,36 +149,28 @@
 				},
 
 				// Attack has the same rules of movement
-				canAttack: (piece, dest_x, dest_y) => { return this.bi.canMove(piece, dest_x, dest_y) },
+				canAttack: (piece, dest_x, dest_y) => { return this.bishop.canMove(piece, dest_x, dest_y) },
+
+				canJump: false,
 
 			}
 
 			// Queen attributes
-			this.qu = {
+			this.queen = {
 
 				canMove: function(piece, dest_x, dest_y) {
 
-					var diff_x = dest_x - piece.x;
-					var diff_y = dest_y - piece.y;
-
-					// The cartesian coordinates is upside-down!
-
-					if ( diff_x == diff_y ) // first quadrant and third quadrant
-						return true;
-					if ( -diff_x == diff_y ) // second quadrant
-						return true;
-					if ( diff_x == -diff_y ) // forth quadrant
-						return true;
-
-					if ( piece.x != dest_x && piece.y == dest_y ) // vertical
-						return true;
-					if ( piece.x == dest_x && piece.y != dest_y ) // horizontal
+					// Queen movements are the merge of bishop and rook movements:
+					if ( self.bishop.canMove(piece, dest_x, dest_y) || 
+						 self.rook.canMove(piece, dest_x, dest_y) )
 						return true;
 
 				},
 
 				// Attack has the same rules of movement
-				canAttack: (piece, dest_x, dest_y) => { return this.qu.canMove(piece, dest_x, dest_y) },
+				canAttack: (piece, dest_x, dest_y) => { return this.queen.canMove(piece, dest_x, dest_y) },
+
+				canJump: false,
 
 			}
 

@@ -13,10 +13,6 @@
 	transition: 0.2s;
 }
 
-/*.board table tr td img:hover {
-	background-color: #D3C139;
-}*/
-
 .message {
 	color: red;
 }
