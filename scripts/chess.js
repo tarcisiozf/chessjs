@@ -1,9 +1,4 @@
 
-	/*
-		TODO:
-		path collision
-	*/
-
 	class Chess {
 
 		constructor(player, socketIO) {
@@ -77,16 +72,23 @@
 
 			var destHasPiece = this.destinationHasPiece(x, y);
 			var isEnemy = this.isOpponentPiece(x, y);
-			var piece = this.piecesAttributes[this.selected_piece.piece]; // Rules of movements, attacks and etc 
+			var pieceAttrs = this.piecesAttributes[this.selected_piece.piece]; // Rules of movements, attacks and etc 
 
 			if ( destHasPiece && ! isEnemy ) { // destination is not emptyy
-
 				this.showMessage("That square is already occupied!");
 				return;
+			} 
 
-			} else if ( destHasPiece && isEnemy ) { // destination has an enemy piece
+			// Check if the path is not blocked
+			if ( ! pieceAttrs.canJump && this.pathIsBlocked(pieceAttrs, x, y) ) {
+				this.showMessage("Your path is blocked!");
+				return;
+			}
 
-				if ( piece.canAttack(this.selected_piece, x, y) ) {
+			// destination has an enemy piece
+			if ( destHasPiece && isEnemy ) { 
+
+				if ( pieceAttrs.canAttack(this.selected_piece, x, y) ) {
 					this.attackPiece(x, y);
 				} else {
 					this.showMessage("You can't attack that piece!");
@@ -96,14 +98,8 @@
 			} else {
 
 				// Check if movement is valid
-				if ( ! piece.canMove(this.selected_piece, x, y) ) {
+				if ( ! pieceAttrs.canMove(this.selected_piece, x, y) ) {
 					this.showMessage("This isn't a valid movement!");
-					return;
-				}
-
-				// Check if the path is not blocked
-				if ( ! piece.canJump && this.pathIsBlocked(x, y) ) {
-					this.showMessage("Your path is blocked!");
 					return;
 				}
 
@@ -113,25 +109,46 @@
 			this.changeTurn();
 		}
 
-		pathIsBlocked(x, y) {
+		pathIsBlocked(pieceAttrs, x, y) {
 
 			// moving from left to right
-			var range_x = _.range(this.selected_piece.x, x+1);
-			var range_y = _.range(this.selected_piece.y, y+1);
+			var range_x = this.range(this.selected_piece.x+1, x+1);
 
 			// moving from right to left
 			if ( ! range_x.length ) 
-				range_x = _.range(x, this.selected_piece.x+1);
+				range_x = this.range(x, this.selected_piece.x);
 
+			
+			// moving from top to bottom
+			var range_y = this.range(this.selected_piece.y+1, y+1);
+
+			// moving from bottom to top
 			if ( ! range_y.length ) 
-				range_y = _.range(y, this.selected_piece.y+1);
+				range_y = this.range(y, this.selected_piece.y);
 
-			console.log(range_x, range_y);
+			// is required one position by axis at least
+			if ( ! range_x[0] )
+				range_x[0] = this.selected_piece.x;
 
-			x = range_x[0] || x;
-			y = range_y[0] || y;
+			if ( ! range_y[0] )
+				range_y[0] = this.selected_piece.y;
 
-			console.log(x, y);
+			// verify every combination of the array
+			for ( var i_x in range_x ) {
+				for( var i_y in range_y ) {
+
+					x = range_x[i_x];
+					y = range_y[i_y];
+
+					// valid movements only
+					if ( ! pieceAttrs.canMove(this.selected_piece, x, y) )
+						continue;
+
+					if ( this.destinationHasPiece(x, y) )
+						return true;
+
+				}
+			}
 
 		}
 
@@ -211,6 +228,16 @@
 			this.player ^= 1;
 			this.showMessage(`Now it's ${['Light','Dark'][this.player]} player turn`, false);
 			this.socket.emit('setPlayer', { player: this.player });
+		}
+
+		range(begin, final) {
+			let output = [];
+
+			for (var i = begin; i < final; i++) {
+				output.push(i);
+			}
+
+			return output;
 		}
 
 		renderBoard() {

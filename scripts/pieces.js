@@ -38,14 +38,14 @@
 				canAttack: function(piece, dest_x, dest_y) {
 
 					if ( piece.player ) { // dark player
-						if ( piece.y + 1 == dest_y && piece.x - 1 == dest_x ) // bottom_left
+						if ( piece.y + 1 == dest_y && piece.x - 1 == dest_x ) // bottom left
 							return true;
-						if ( piece.y + 1 == dest_y && piece.x + 1 == dest_x ) // bottom_right
+						if ( piece.y + 1 == dest_y && piece.x + 1 == dest_x ) // bottom right
 							return true;
 					} else { // light player
-						if ( piece.y - 1 == dest_y && piece.x - 1 == dest_x ) // top_left
+						if ( piece.y - 1 == dest_y && piece.x - 1 == dest_x ) // top left
 							return true;
-						if ( piece.y - 1 == dest_y && piece.x + 1 == dest_x ) // top_right
+						if ( piece.y - 1 == dest_y && piece.x + 1 == dest_x ) // top right
 							return true;
 					}
 
