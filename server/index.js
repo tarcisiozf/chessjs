@@ -30,7 +30,3 @@ io.on('connection', function (socket) {
 	});
 
 });
-
-/*setInterval(function() { 
-	io.in(1).emit('msg', 'teste');
-}, 3000);*/

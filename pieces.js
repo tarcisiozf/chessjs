@@ -1,17 +1,24 @@
-	
-	/*
-		-1, -1		x, -1		+1, -1
-
-		-1, y		x, y		+1, y
-
-		-1, +1		x, +1		+1, +1
-	*/
 
 	class piecesAttributes {
 
 		constructor() {
 
 			var self = this;
+
+			// Attack has the same rules of movement
+			let attackIsMove = function(piece, dest_x, dest_y){
+				return this.canMove(piece, dest_x, dest_y);
+			};
+
+			let checkByPosition = function(piece, dest_x, dest_y) {
+				return 	this.positions
+							.map( pos => ( 
+								piece.x + pos[0] == dest_x && 
+								piece.y + pos[1] == dest_y 
+							))
+							.filter( pos => pos )
+							.length > 0; // at least of position must be true
+			}
 
 			// Pawn attributes
 			this.pawn = {
@@ -24,7 +31,7 @@
 
 					if ( piece.y + step == dest_y && piece.x == dest_x ) 
 						return true;
-					if ( piece.y + (step*2) == dest_y && piece.x == dest_x ) 
+					if ( piece.y + (step * 2) == dest_y && piece.x == dest_x ) 
 						return true;
 				},
 
@@ -51,63 +58,40 @@
 			// Knight attributes
 			this.knight = {
 
-				canMove: function(piece, dest_x, dest_y) {
+				//	[x, y]
+				positions: [
+					[1, -2],	// 1 o'clock
+					[2, -1],	// 2 o'clock
+					[2, 1],		// 4 o'clock
+					[1, 2],		// 5 o'clock
+					[-1, 2],	// 7 o'clock
+					[-2, 1],	// 8 o'clock
+					[-2, -1],	// 10 o'clock
+					[-1, -2],	// 11 o'clock
+				],
 
-					if ( piece.x + 1 == dest_x && piece.y - 2 == dest_y ) // 1 o'clock
-						return true;
-					if ( piece.x + 2 == dest_x && piece.y - 1 == dest_y ) // 2 o'clock
-						return true;
-					if ( piece.x + 2 == dest_x && piece.y + 1 == dest_y ) // 4 o'clock
-						return true;
-					if ( piece.x + 1 == dest_x && piece.y + 2 == dest_y ) // 5 o'clock
-						return true;
-					if ( piece.x - 1 == dest_x && piece.y + 2 == dest_y ) // 7 o'clock
-						return true;
-					if ( piece.x - 2 == dest_x && piece.y + 1 == dest_y ) // 8 o'clock
-						return true;
-					if ( piece.x - 2 == dest_x && piece.y - 1 == dest_y ) // 10 o'clock
-						return true;
-					if ( piece.x - 1 == dest_x && piece.y - 2 == dest_y ) // 11 o'clock
-						return true;
-
-				},
-
-				// Attack has the same rules of movement
-				canAttack: (piece, dest_x, dest_y) => { return this.knight.canMove(piece, dest_x, dest_y) },
-
+				canMove: checkByPosition,
+				canAttack: attackIsMove,
 				canJump: true,
-
 			}
 
 			// King attributes
 			this.king = {
 
-				canMove: function(piece, dest_x, dest_y) {
+				positions: [
+					[-1, -1], 	// top left
+					[0, -1], 	// top center
+					[1, -1], 	// top right
+					[-1, 0], 	// middle left
+					[1, 0], 	// middle right
+					[-1, 1], 	// bottom left
+					[0, 1], 	// bottom center
+					[1, 1], 	// bottom right
+				],
 
-					if ( piece.x - 1 == dest_x && piece.y - 1 == dest_y ) // top left
-						return true;
-					if ( piece.x == dest_x	   && piece.y - 1 == dest_y ) // top center
-						return true;
-					if ( piece.x + 1 == dest_x && piece.y - 1 == dest_y ) // top right
-						return true;
-					if ( piece.x - 1 == dest_x && piece.y == dest_y ) // middle left
-						return true;
-					if ( piece.x + 1 == dest_x && piece.y == dest_y ) // middle right
-						return true;
-					if ( piece.x - 1 == dest_x && piece.y + 1 == dest_y ) // bottom left
-						return true;
-					if ( piece.x == dest_x 	   && piece.y + 1 == dest_y ) // bottom center
-						return true;
-					if ( piece.x + 1 == dest_x && piece.y + 1 == dest_y ) // bottom right
-						return true;
-
-				},
-
-				// Attack has the same rules of movement
-				canAttack: (piece, dest_x, dest_y) => { return this.king.canMove(piece, dest_x, dest_y) },
-
+				canMove: checkByPosition,
+				canAttack: attackIsMove,
 				canJump: false,
-
 			}
 
 			// Rook attributes
@@ -122,11 +106,8 @@
 
 				},
 
-				// Attack has the same rules of movement
-				canAttack: (piece, dest_x, dest_y) => { return this.rook.canMove(piece, dest_x, dest_y) },
-
+				canAttack: attackIsMove,
 				canJump: false,
-
 			}
 
 			// Bishop attributes
@@ -148,11 +129,8 @@
 
 				},
 
-				// Attack has the same rules of movement
-				canAttack: (piece, dest_x, dest_y) => { return this.bishop.canMove(piece, dest_x, dest_y) },
-
+				canAttack: attackIsMove,
 				canJump: false,
-
 			}
 
 			// Queen attributes
@@ -167,17 +145,14 @@
 
 				},
 
-				// Attack has the same rules of movement
-				canAttack: (piece, dest_x, dest_y) => { return this.queen.canMove(piece, dest_x, dest_y) },
-
+				canAttack: attackIsMove,
 				canJump: false,
-
 			}
 
 		}
 
 		parse(square) {
-			if ( ! square.match(/_/) )
+			if ( square === 'empty' )
 				return;
 
 			var info = square.split('_');

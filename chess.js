@@ -2,8 +2,6 @@
 	/*
 		TODO:
 		path collision
-		multiplayer
-		checkmate
 	*/
 
 	class Chess {
@@ -46,7 +44,7 @@
 
 			var self = this;
 
-			this.socket = socketIO('http://192.168.0.100:3000');
+			this.socket = socketIO('http://localhost:3000');
 
 			this.socket.emit('join_room', { 'room_id': 1});
 			
@@ -113,7 +111,6 @@
 			}
 
 			this.changeTurn();
-
 		}
 
 		pathIsBlocked(x, y) {
@@ -200,7 +197,7 @@
 		attackPiece(x, y, broadcast = true) {
 
 			if ( broadcast )
-				this.socket.emit('movePiece', { selected_piece: this.selected_piece, x, y });
+				this.socket.emit('attackPiece', { selected_piece: this.selected_piece, x, y });
 
 			this.board[y][x] = `${this.selected_piece.piece}_${this.selected_piece.player}`;
 			this.board[this.selected_piece.y][this.selected_piece.x] = 'empty';
